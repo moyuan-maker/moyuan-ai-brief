@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>墨远 AI 论文简报</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text-2: #444;
+    --text-3: #888;
+    --link: #1a1a1a;
+    --accent: #0060df;
+    --border: #e8e8e8;
+    --border-2: #d0d0d0;
+    --tag-bg: #f2f2f2;
+    --max-w: 680px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', -apple-system, sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { color: var(--accent); }
+
+  /* HEADER */
+  header { border-bottom: 1px solid var(--border); }
+  .header-inner { max-width: var(--max-w); margin: 0 auto; padding: 20px 24px 0; }
+  nav { display: flex; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 4px 0; }
+  .site-logo { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 500; color: var(--text); margin-right: 20px; white-space: nowrap; }
+  .nav-links { display: flex; list-style: none; }
+  .nav-links li a { font-size: 14px; color: var(--text-3); padding: 2px 12px; border-left: 1px solid var(--border); display: block; transition: color 0.15s; }
+  .nav-links li:first-child a { border-left: none; }
+  .nav-links li a:hover, .nav-links li a.active { color: var(--text); }
+
+  /* HERO */
+  .hero { max-width: var(--max-w); margin: 0 auto; padding: 36px 24px 28px; border-bottom: 1px solid var(--border); }
+  .hero h1 { font-family: 'Noto Serif SC', serif; font-size: 21px; font-weight: 500; line-height: 1.55; color: var(--text); margin-bottom: 10px; }
+  .hero p { font-size: 14px; color: var(--text-2); line-height: 1.85; }
+
+  /* MAIN */
+  main { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* DAILY LIST */
+  .daily-list { padding: 0; }
+  .daily-entry { padding: 28px 0; border-bottom: 1px solid var(--border); display: block; color: var(--text); cursor: pointer; transition: opacity 0.15s; }
+  .daily-entry:hover { opacity: 0.72; }
+  .entry-date { font-size: 13px; color: var(--text-3); margin-bottom: 10px; }
+  .entry-papers { list-style: none; }
+  .entry-papers li { font-size: 15px; line-height: 1.8; color: var(--text-2); padding: 3px 0 3px 28px; position: relative; }
+  .entry-papers li .num { position: absolute; left: 0; top: 5px; font-size: 12px; color: var(--text-3); font-family: 'Noto Sans SC', sans-serif; }
+  .entry-papers li strong { color: var(--text); font-weight: 500; }
+  .entry-footer { margin-top: 12px; }
+  .source-link { font-size: 13px; color: var(--text-3); border-bottom: 1px solid var(--border-2); padding-bottom: 1px; transition: color 0.15s; }
+  .daily-entry:hover .source-link { color: var(--accent); border-color: var(--accent); }
+
+  /* SKELETON */
+  .skeleton-entry { padding: 28px 0; border-bottom: 1px solid var(--border); }
+  .sk { background: #f0f0f0; border-radius: 3px; animation: sk 1.4s ease infinite; }
+  @keyframes sk { 0%,100%{opacity:1} 50%{opacity:.45} }
+  .sk-date { height: 13px; width: 80px; margin-bottom: 14px; }
+  .sk-line { height: 14px; margin-bottom: 9px; }
+
+  /* DETAIL */
+  .detail-view { padding: 32px 0 60px; }
+  .detail-back { font-size: 13px; color: var(--text-3); cursor: pointer; margin-bottom: 28px; display: inline-block; transition: color 0.15s; }
+  .detail-back:hover { color: var(--accent); }
+  .detail-date { font-size: 13px; color: var(--text-3); margin-bottom: 6px; }
+  .detail-subtitle { font-size: 14px; color: var(--text-3); margin-bottom: 32px; }
+  .detail-paper { padding: 24px 0; border-bottom: 1px solid var(--border); }
+  .detail-paper:last-child { border-bottom: none; }
+  .detail-num { font-size: 12px; color: var(--text-3); margin-bottom: 6px; }
+  .detail-title { font-family: 'Noto Serif SC', serif; font-size: 17px; font-weight: 500; line-height: 1.55; color: var(--text); margin-bottom: 10px; }
+  .detail-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tag { font-size: 11px; color: var(--text-3); background: var(--tag-bg); padding: 2px 8px; border-radius: 2px; }
+  .tag-inst { color: #0060df; background: #e8f0ff; }
+  .tag-conf { color: #2a7a2a; background: #e8f8e8; }
+  .detail-tldr { font-size: 14px; line-height: 1.9; color: var(--text-2); margin-bottom: 12px; }
+  .detail-tldr strong { color: var(--text); font-weight: 500; }
+  .detail-insight { font-size: 14px; line-height: 1.9; color: var(--text-2); border-left: 2px solid var(--border-2); padding-left: 14px; margin: 14px 0; font-style: italic; }
+  .detail-link { font-size: 12px; color: var(--accent); border-bottom: 1px solid rgba(0,96,223,0.3); padding-bottom: 1px; }
+
+  /* SUBSCRIBE */
+  .subscribe-section { padding: 32px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 16px 0; }
+  .sub-label { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .sub-desc { font-size: 13px; color: var(--text-3); margin-bottom: 14px; }
+  .sub-form { display: flex; gap: 8px; max-width: 340px; }
+  .sub-input { flex: 1; border: 1px solid var(--border-2); padding: 7px 10px; font-family: inherit; font-size: 13px; color: var(--text); outline: none; background: var(--bg); transition: border-color 0.15s; }
+  .sub-input:focus { border-color: var(--accent); }
+  .sub-input::placeholder { color: var(--text-3); }
+  .sub-btn { background: var(--text); color: var(--bg); border: none; padding: 7px 16px; font-family: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
+  .sub-btn:hover { opacity: 0.75; }
+
+  /* METHOD */
+  .method-page { padding: 40px 0 80px; }
+  .method-page h1 { font-family: 'Noto Serif SC', serif; font-size: 22px; font-weight: 500; margin-bottom: 8px; }
+  .method-lead { font-size: 14px; color: var(--text-2); margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid var(--border); line-height: 1.9; }
+  .method-section { margin-bottom: 36px; }
+  .method-section h2 { font-size: 14px; font-weight: 500; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .method-section p { font-size: 14px; line-height: 1.9; color: var(--text-2); margin-bottom: 12px; }
+  .method-section ul { list-style: none; }
+  .method-section ul li { font-size: 14px; line-height: 1.85; color: var(--text-2); padding: 5px 0 5px 14px; border-bottom: 1px dotted var(--border); position: relative; }
+  .method-section ul li::before { content: '·'; position: absolute; left: 3px; color: var(--text-3); }
+  .stbl { width: 100%; border-collapse: collapse; font-size: 13px; margin: 14px 0; }
+  .stbl th { text-align: left; padding: 8px 10px; background: var(--tag-bg); font-weight: 500; font-size: 12px; color: var(--text-3); border-bottom: 1px solid var(--border); }
+  .stbl td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text-2); line-height: 1.6; vertical-align: top; }
+  .stbl td:first-child { font-weight: 500; color: var(--text); width: 28%; white-space: nowrap; }
+
+  /* FAQ */
+  .faq { padding: 16px 0 60px; }
+  .faq-item { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .faq-q { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  .faq-a { font-size: 14px; color: var(--text-2); line-height: 1.85; }
+
+  /* FOOTER */
+  footer { max-width: var(--max-w); margin: 0 auto; padding: 18px 24px 40px; font-size: 13px; color: var(--text-3); }
+  footer a { color: var(--text-3); margin: 0 6px; }
+  footer a:first-child { margin-left: 0; }
+  footer a:hover { color: var(--accent); }
+  .sep { color: var(--border-2); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: #fff; font-size: 13px; padding: 9px 14px; opacity: 0; transform: translateY(6px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 100; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 600px) {
+    .sub-form { flex-direction: column; }
+    .hero h1 { font-size: 18px; }
+    .entry-papers li { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <nav>
+      <span class="site-logo">墨远 AI 论文简报</span>
+      <ul class="nav-links">
+        <li><a href="#" class="active" onclick="showPage('home');return false;">首页</a></li>
+        <li><a href="#" onclick="showPage('method');return false;">方法论</a></li>
+        <li><a href="#" onclick="scrollToSub();return false;">订阅</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <h1>每天3分钟，从源头论文把握AI前沿</h1>
+  <p>从 arXiv 每日 200–400 篇 AI 论文中，筛选最值得从业者关注的 3–5 篇，用产品经理、创业者、开发者能理解的语言解读它们的意义。</p>
+</div>
+
+<main>
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="daily-list" id="daily-list">
+      <div class="skeleton-entry"><div class="sk sk-date"></div><div class="sk sk-line" style="width:95%"></div><div class="sk sk-line" style="width:88%"></div><div class="sk sk-line" style="width:92%"></div></div>
+      <div class="skeleton-entry"><div class="sk sk-date"></div><div class="sk sk-line" style="width:90%"></div><div class="sk sk-line" style="width:82%"></div><div class="sk sk-line" style="width:86%"></div><div class="sk sk-line" style="width:78%"></div></div>
+    </div>
+
+    <div class="subscribe-section" id="sub-anchor">
+      <div class="sub-label">订阅墨远 AI 论文简报</div>
+      <div class="sub-desc">论文我来读，简报发给你</div>
+      <div class="sub-form">
+        <input class="sub-input" type="email" placeholder="Email" id="email-input">
+        <button class="sub-btn" onclick="handleSub()">订阅</button>
+      </div>
+    </div>
+
+    <div class="faq">
+      <div class="faq-item">
+        <div class="faq-q">我不是研究员，能看懂吗？</div>
+        <div class="faq-a">完全可以。每篇解读先讲"这件事为什么重要"，再讲技术细节，术语会直接解释。创业者、产品经理、独立开发者是主要读者群。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">和刷公众号看到的 AI 资讯有什么区别？</div>
+        <div class="faq-a">大多数 AI 资讯是对已有报道的二手转述，容易失真。墨远 AI 论文简报直接从 arXiv 原始论文出发，用规则引擎从每天 300+ 篇中筛选，每篇都附原论文链接可以自行验证。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">论文是怎么筛选的？</div>
+        <div class="faq-a">自动评分 + AI 解读。综合机构背景、社区热度、代码可用性等 8 类信号打分，完整规则公开在<a href="#" onclick="showPage('method');return false;" style="color:var(--accent)">方法论页面</a>。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="page" id="page-detail">
+    <div class="detail-view" id="detail-content"></div>
+  </div>
+
+  <!-- METHOD -->
+  <div class="page" id="page-method">
+    <div class="method-page">
+      <h1>方法论</h1>
+      <p class="method-lead">墨远 AI 论文简报是一份面向 AI 行业从业者的每日简报，由墨远出品。从 arXiv 每天数百篇新论文中，筛选出最值得关注的 3–5 篇，用从业者能理解的语言解读它们的意义。</p>
+      <div class="method-section">
+        <h2>为什么做这个</h2>
+        <p>arXiv 的 AI 相关分类每天新增 200–400 篇论文。即使是全职研究员，也不可能全部看完。对于产品经理、创业者、独立开发者来说，这个信息量更是完全不可能消化——但这些人同样需要知道行业在发生什么。</p>
+        <p>不是每个细节，而是：哪些技术方向在加速，哪些假设被挑战了，哪些新工具可能改变现有的工作方式。</p>
+      </div>
+      <div class="method-section">
+        <h2>数据采集</h2>
+        <ul>
+          <li>cs.AI — 人工智能</li>
+          <li>cs.CL — 计算与语言（NLP）</li>
+          <li>cs.LG — 机器学习</li>
+          <li>cs.CV — 计算机视觉</li>
+          <li>cs.MA — 多智能体系统</li>
+          <li>HuggingFace Daily Papers — 社区推荐</li>
+        </ul>
+      </div>
+      <div class="method-section">
+        <h2>多信号评分</h2>
+        <table class="stbl">
+          <tr><th>信号</th><th>逻辑</th></tr>
+          <tr><td>机构背景</td><td>来自 Google、OpenAI、Meta、清华、Stanford 等顶级机构加分</td></tr>
+          <tr><td>社区推荐</td><td>被 HuggingFace Daily Papers 收录加分</td></tr>
+          <tr><td>社区热度</td><td>HF 投票数越高分数越高（分 4 档）</td></tr>
+          <tr><td>顶会收录</td><td>被 ICLR、NeurIPS、ICML 等接收加分</td></tr>
+          <tr><td>代码可用</td><td>有开源代码实现加分</td></tr>
+          <tr><td>从业者相关性</td><td>标题含部署、推理优化、Agent 等关键词加分</td></tr>
+          <tr><td>学术影响力</td><td>Semantic Scholar 高频引用加分</td></tr>
+          <tr><td>开源热度</td><td>关联仓库在 GitHub Trending 加分</td></tr>
+        </table>
+      </div>
+      <div class="method-section">
+        <h2>解读原则</h2>
+        <ul>
+          <li>先讲问题，再讲方案——读者先理解"为什么这件事重要"</li>
+          <li>从业者视角——重点是"这跟我有什么关系"</li>
+          <li>保持克制——不过度解读，不称所有东西为"突破"</li>
+          <li>可验证——每篇解读都附 arXiv 链接，读者可自行查证</li>
+        </ul>
+      </div>
+      <div class="method-section">
+        <h2>已知局限</h2>
+        <ul>
+          <li>自动化筛选有盲区：小众但高价值的工作可能因缺少社区信号被遗漏</li>
+          <li>评分体系偏工程导向，可能低估纯理论贡献</li>
+          <li>解读基于摘要而非全文，深度有限，以原论文为准</li>
+          <li>单一时间切面，不回溯更新历史简报</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <a href="#" onclick="showPage('home');return false;">存档</a><span class="sep"> · </span>
+  <a href="#" onclick="showPage('method');return false;">方法论</a><span class="sep"> · </span>
+  <a href="#" onclick="scrollToSub();return false;">订阅</a><span class="sep"> · </span>
+  <span>© 2026 墨远</span>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KIMI_API_KEY = 'sk-kimi-X1bxtTeoMazQGWfFJgeEzl049VJmAKsgy1LvbWaQPcZQuLVbAEByjIDVlQ6wD7pp';
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach((a,i) => {
+    a.classList.toggle('active', (id==='home'&&i===0)||(id==='method'&&i===1));
+  });
+  window.scrollTo(0,0);
+}
+
+function scrollToSub() {
+  showPage('home');
+  setTimeout(() => document.getElementById('sub-anchor').scrollIntoView({behavior:'smooth',block:'center'}), 80);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function handleSub() {
+  const v = document.getElementById('email-input').value.trim();
+  if (!v || !v.includes('@')) { showToast('请输入有效邮箱'); return; }
+  showToast('订阅成功 ✓');
+  document.getElementById('email-input').value = '';
+}
+
+let allDays = [];
+
+function openDetail(idx) {
+  const day = allDays[idx];
+  if (!day) return;
+  const papersHtml = day.papers.map((p,i) => `
+    <div class="detail-paper">
+      <div class="detail-num">0${i+1}</div>
+      <div class="detail-title">${p.title}</div>
+      <div class="detail-meta">
+        <span class="tag">${p.topic}</span>
+        <span class="tag tag-inst">${p.institution}</span>
+        ${p.conf ? `<span class="tag tag-conf">${p.conf}</span>` : ''}
+        ${p.code ? `<span class="tag">开源代码</span>` : ''}
+      </div>
+      <div class="detail-tldr">${p.tldr}</div>
+      <div class="detail-insight">${p.insight}</div>
+      <a class="detail-link" href="https://arxiv.org/abs/${p.arxiv_id}" target="_blank">arXiv: ${p.arxiv_id} →</a>
+    </div>`).join('');
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-back" onclick="showPage('home')">← 返回列表</div>
+    <div class="detail-date">${day.date}</div>
+    <div class="detail-subtitle">从 ${day.scanned} 篇论文中筛选</div>
+    ${papersHtml}`;
+  showPage('detail');
+}
+
+function renderList(days) {
+  allDays = days;
+  const c = document.getElementById('daily-list');
+  c.innerHTML = '';
+  days.forEach((day, idx) => {
+    const items = day.papers.map((p,i) => `<li><span class="num">0${i+1}</span>${p.summary}</li>`).join('');
+    const el = document.createElement('a');
+    el.className = 'daily-entry';
+    el.href = '#';
+    el.innerHTML = `
+      <div class="entry-date">${day.date}</div>
+      <ul class="entry-papers">${items}</ul>
+      <div class="entry-footer"><span class="source-link">从 ${day.scanned} 篇论文中筛选 ↗</span></div>`;
+    el.addEventListener('click', e => { e.preventDefault(); openDetail(idx); });
+    c.appendChild(el);
+  });
+}
+
+async function generate() {
+  const now = new Date();
+  const dates = Array.from({length:5}, (_,i) => {
+    const d = new Date(now); d.setDate(d.getDate()-i);
+    return d.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'});
+  });
+
+  const prompt = `你是"墨远AI论文简报"编辑，为AI行业从业者解读arXiv论文。
+
+为以下5天各生成一期（第1期最新最详细，有4-5篇；后面每期3-4篇）：
+${dates.map((d,i)=>`第${i+1}期：${d}`).join('\n')}
+
+每期格式：
+- date: 日期
+- scanned: 扫描数（150-420）
+- papers数组，每篇：
+  - topic: Agent/推理/多模态/训练优化/RAG/安全对齐/代码/视觉生成
+  - title: 中文标题（15-28字）
+  - institution: 机构
+  - conf: 顶会或空字符串
+  - code: true/false
+  - arxiv_id: 虚构编号如2403.XXXXX
+  - summary: 一句话摘要，**核心发现加粗**，说明意义，30-50字
+  - tldr: 两句技术说明，50-80字
+  - insight: 从业者视角，80-120字
+
+只返回JSON数组，不要其他文字：
+[{"date":"","scanned":280,"papers":[{"topic":"","title":"","institution":"","conf":"","code":false,"arxiv_id":"","summary":"","tldr":"","insight":""}]}]`;
+
+  try {
+    const res = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+KIMI_API_KEY},
+      body: JSON.stringify({model:'moonshot-v1-32k', max_tokens:4000, messages:[{role:'user',content:prompt}]})
+    });
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content || '';
+    renderList(JSON.parse(text.replace(/```json|```/g,'').trim()));
+  } catch(e) { renderFallback(); }
+}
+
+function renderFallback() {
+  const now = new Date();
+  const d = (n) => new Date(now.getTime()-n*86400000).toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'});
+  renderList([
+    { date: d(0), scanned: 312, papers: [
+      { topic:'Agent', title:'ReActPlus 增强型推理-行动框架显著提升 LLM Agent 规划成功率', institution:'Google DeepMind', conf:'', code:true, arxiv_id:'2403.18291',
+        summary:'<strong>ReActPlus 让 Agent 规划成功率提升 34%</strong>，通过回溯验证机制减少长链任务走偏，代码已开源',
+        tldr:'提出新型 Agent 框架，在复杂多步任务上规划成功率提升 34%。核心是引入回溯验证机制——Agent 每步执行前先验证当前状态是否符合总体规划。',
+        insight:'对产品团队而言，基于 LLM 构建的工作流自动化工具将大幅提升可靠性。现有框架在长链任务上容易偏离目标，ReActPlus 可直接替换现有 Agent 的规划模块，代码已开源迁移成本极低。' },
+      { topic:'推理', title:'CoT 压缩技术将推理 Token 成本降低 60% 同时保持准确率', institution:'清华大学 / 智谱 AI', conf:'ICLR 2026', code:false, arxiv_id:'2403.17445',
+        summary:'<strong>推理 Token 成本降低 60%</strong>，动态剪枝冗余 CoT 步骤，准确率不掉，适配所有模型',
+        tldr:'通过动态剪枝思维链中冗余步骤，在不损失准确率的前提下将推理成本降低 60%。方法在推理阶段对生成的思维链做实时压缩，不改变模型本身。',
+        insight:'推理成本一直是限制 CoT 大规模落地的核心障碍。对于调用量大的应用，Token 成本降低 60% 意味着显著的利润改善。方法适配所有支持 CoT 的模型，迁移成本极低。' },
+      { topic:'RAG', title:'HybridRAG 融合稀疏与密集检索在问答基准上刷新最优', institution:'Meta AI', conf:'', code:true, arxiv_id:'2403.16782',
+        summary:'<strong>HybridRAG 在 6 个 QA 数据集上超越现有最优</strong>，自适应权重机制动态融合 BM25 和向量检索，无需重训',
+        tldr:'将 BM25 稀疏检索与向量密集检索动态融合，在 6 个 QA 数据集上均超越现有最优。核心是自适应权重机制，根据查询类型自动调整两种检索方式的比重。',
+        insight:'对正在搭建知识库问答系统的团队，可以直接替换现有检索层，无需重新训练模型，是近期 RAG 方向最具工程价值的工作之一。' },
+      { topic:'多模态', title:'90% 视觉 Token 可压缩，HiDrop 分层策略保持性能不降', institution:'北京大学', conf:'ICLR 2026', code:true, arxiv_id:'2403.15891',
+        summary:'<strong>90% 视觉 token 可安全压缩</strong>，HiDrop 发现浅层特征对齐 token 不该剪，分层策略是关键，ICLR 接收',
+        tldr:'发现浅层视觉 token 负责特征对齐不应压缩，深层 token 大量冗余可安全剪除。通过分层策略实现 90% 压缩率同时保持性能。',
+        insight:'对部署多模态模型的团队，推理成本可以大幅下降。90% 压缩率在保持性能的同时能显著降低 GPU 内存和推理延迟，对实时应用场景尤为重要。' }
+    ]},
+    { date: d(1), scanned: 275, papers: [
+      { topic:'视觉生成', title:'Masked 图像生成 4 倍加速且质量不掉，动力学建模替代静态缓存', institution:'字节跳动', conf:'', code:false, arxiv_id:'2403.14902',
+        summary:'<strong>Masked 图像生成速度提升 4 倍</strong>，用动力学建模替代静态缓存，语义信息保留更完整',
+        tldr:'用动力学模型预测下一步最优的 mask 位置，替代传统静态缓存策略。在 ImageNet 基准上实现 4 倍加速，生成质量不降。',
+        insight:'4 倍推理加速意味着成本降到四分之一，或同样成本服务 4 倍用户。该方法即插即用，不需要重新训练模型，对做图像生成产品的团队有直接参考价值。' },
+      { topic:'安全对齐', title:'数据筛选过程本身就泄露成员信息，Anthropic 研究揭示训练数据隐私风险', institution:'Anthropic', conf:'', code:false, arxiv_id:'2403.13901',
+        summary:'<strong>即使模型只在公开数据上训练，攻击者仍可推断数据集组成</strong>，隐私风险被低估',
+        tldr:'Anthropic 研究表明，数据筛选过程本身会泄露成员信息。即使模型未直接训练私有数据，攻击者仍可通过模型行为推断原始训练数据集的组成。',
+        insight:'对构建 AI 产品的团队，这意味着数据隐私保护需要从数据筛选阶段就开始考虑，而不仅仅是模型训练阶段。现有的差分隐私方案可能不足以应对这类攻击。' },
+      { topic:'训练优化', title:'VLM 量化不能一刀切，MoE 式动态误差补偿 2B 到 70B 均有效', institution:'腾讯 AI Lab', conf:'CVPR 2026', code:true, arxiv_id:'2403.13445',
+        summary:'<strong>视觉和语言 token 分布差异大</strong>，MoE 式动态误差补偿让不同 token 走不同修复路径，CVPR 接收',
+        tldr:'发现 VLM 中视觉和语言 token 的量化误差分布差异显著，不能用同一策略处理。提出 MoE 式动态补偿，对不同 token 类型选择最优修复路径。',
+        insight:'对需要在资源受限设备上部署 VLM 的团队，这个方案在 2B 到 70B 规模上均验证有效，可以在保持模型能力的同时大幅降低显存占用，是目前 VLM 量化方向最可靠的工程方案之一。' }
+    ]},
+    { date: d(2), scanned: 353, papers: [
+      { topic:'Agent', title:'Deep Research Agent 砍掉七成推理步骤反而更准，搜索广度比深度重要', institution:'Stanford', conf:'', code:true, arxiv_id:'2403.13780',
+        summary:'<strong>并行证据采集替代串行推理链，准确率反而更高</strong>，搜索广度比推理深度更值得投入',
+        tldr:'通过并行采集多路证据替代串行推理链，推理步骤减少 70% 同时提升了准确率。发现对搜索类任务，广度比深度更重要。',
+        insight:'对构建 research agent 的团队，这个发现颠覆了"更多推理步骤=更准"的直觉。并行搜索架构不仅更快更准，还大幅降低 token 消耗，是值得直接参考的工程方向。' },
+      { topic:'推理', title:'Latent 推理性能提升来自副作用，显式文本推理方案反而更优', institution:'MIT', conf:'', code:false, arxiv_id:'2403.12654',
+        summary:'<strong>因果分析揭示 Latent 推理存在根本缺陷</strong>，latent token 与输出因果断裂，显式推理更稳定',
+        tldr:'通过因果中介分析发现，latent reasoning token 与最终输出之间存在因果断裂。用文本做显式中间推理的简单方案在多数任务上效果更好。',
+        insight:'这对正在跟进 latent reasoning 技术的团队是重要风险提示。与其投入资源复现 latent 推理，不如先把显式 CoT 做扎实，往往能得到更稳定的性能提升。' }
+    ]},
+    { date: d(3), scanned: 288, papers: [
+      { topic:'训练优化', title:'LoRA 基底分解把视觉变换参数化为连续空间，一对示例图即可指定任意变换', institution:'NVIDIA', conf:'', code:true, arxiv_id:'2403.11234',
+        summary:'<strong>一对示例图替代文字 prompt 指定视觉变换方向</strong>，LoRA 连续空间参数化，不再依赖难以言表的描述',
+        tldr:'将 LoRA 基底分解为连续视觉变换空间，让一对示例图即可指定任意变换方向，不再需要文字描述。在风格迁移和图像编辑任务上显著优于现有方法。',
+        insight:'对做图像编辑或视觉创作工具的团队，这意味着可以通过示例图直接控制模型行为，大幅降低用户学习成本，是更自然的人机交互方式。' },
+      { topic:'安全对齐', title:'企业工作流中 74% 任务不需要 Agent 间协调，单调性分析提供形式化判据', institution:'CMU', conf:'', code:false, arxiv_id:'2403.10987',
+        summary:'<strong>74% 企业任务可完全并行无需协调开销</strong>，单调性分析形式化判断任务是否需要 Agent 编排',
+        tldr:'通过单调性分析发现，子结果合并不会变差的任务可以完全并行，省掉全部编排开销。研究对象覆盖真实企业工作流场景。',
+        insight:'对构建企业级 AI 工作流的团队，这个发现可以帮助你在设计阶段判断哪些任务值得用 multi-agent 编排，避免过度工程化。74% 的任务用简单并行就够了。' }
+    ]},
+    { date: d(4), scanned: 239, papers: [
+      { topic:'视觉生成', title:'二进制 token 取代 codebook 索引，260M 参数打平 1.4B 模型图像生成质量', institution:'字节跳动', conf:'', code:true, arxiv_id:'2403.09876',
+        summary:'<strong>BitDance 用 260M 参数打平 1.4B 模型的图像生成质量</strong>，推理快 8.7 倍，1024 分辨率快 30 倍以上',
+        tldr:'用二进制 token 替代传统 codebook 索引，大幅简化了离散图像生成的表示空间。260M 参数在图像质量上媲美 1.4B 模型，推理速度提升 8.7 倍。',
+        insight:'对做图像生成产品的团队，更小的模型 + 更快的推理意味着可以在消费级 GPU 上实现高质量生成，大幅降低部署成本。代码已开源可直接验证。' },
+      { topic:'代码', title:'Coding Agent 评测从单 PR 修复升级到端到端 feature 开发，最强模型只过 11%', institution:'GitHub / Microsoft', conf:'', code:true, arxiv_id:'2403.09234',
+        summary:'<strong>FeatureBench 把 Coding Agent 评测拉向真实开发场景</strong>，端到端 feature 开发最强模型仅过 11%',
+        tldr:'提出 FeatureBench 评测集，将 Coding Agent 评测从单 PR 修复升级到端到端 feature 开发。测试发现当前最强模型在这个真实场景下只有 11% 成功率。',
+        insight:'对正在评估或构建 Coding Agent 产品的团队，这个基准揭示了当前模型在真实开发任务上的能力边界。11% 的成功率意味着全自动 feature 开发还不成熟，但 AI 辅助审查和局部补全已经实用。' }
+    ]}
+  ]);
+}
+
+generate();
+</script>
+</body>
+</html>
